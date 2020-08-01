@@ -3,6 +3,7 @@ import register from './pages/register';
 import forgotPassword from './pages/forgot-password';
 import userHome from './pages/user-home';
 import notFound from './pages/not-found';
+import nonuserHome from './pages/nonuser-home';
 
 export const authedRoutes = [
   { path: '/', exact: true, component: userHome },
@@ -12,5 +13,6 @@ export const authedRoutes = [
 export const unAuthedRoutes = [
   { path: '/login', exact: true, component: login },
   { path: '/register', exact: true, component: register },
-  { path: '/forgot-password', exact: true, component: forgotPassword }
+  { path: '/forgot-password', exact: true, component: forgotPassword },
+  { path: '/', exact: true, component: nonuserHome }
 ];

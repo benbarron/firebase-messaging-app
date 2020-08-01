@@ -1,9 +1,19 @@
 #login-page,
 #register-page,
-#forgot-page {
+#forgot-page,
+#nonuser-homepage {
   .login-form-wrapper,
   .register-form-wrapper,
   .forgot-form-wrapper {
+    min-height: 400px;
+  }
+  .nonuser-homepage-wrapper {
+    min-height: 50px;
+  }
+  .login-form-wrapper,
+  .register-form-wrapper,
+  .forgot-form-wrapper,
+  .nonuser-homepage-wrapper {
     h1.form-header {
       font-size: 32px;
       text-align: center;
@@ -18,7 +28,6 @@
     padding: 15px;
     position: absolute;
     width: 350px;
-    min-height: 400px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -46,10 +55,6 @@
     }
     .brand-button {
       width: 100%;
-    }
-    .google-button {
-    }
-    .github-button {
     }
   }
 }

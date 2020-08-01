@@ -1,0 +1,47 @@
+.user-home-wrapper {
+  .top-nav-wrapper {
+    background: lighten(#0984e3, 10);
+    display: flex;
+    border-bottom: lighten(#777, 20) 0.5px solid;
+    height: 60px;
+    .top-nav-branding {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 256px;
+      h1 {
+        color: #ffffff;
+        margin: 0;
+      }
+    }
+    .top-nav-content {
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      .search-box-wrapper {
+        display: flex;
+        align-items: center;
+        .search-box {
+        }
+      }
+      .userinfo-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .user-avatar {
+          &:hover {
+            cursor: pointer;
+          }
+        }
+      }
+      width: calc(100vw - 256px);
+    }
+  }
+
+  .side-nav-wrapper {
+    max-width: 256px;
+    .sidenav {
+      min-height: calc(100vh - 60px);
+    }
+  }
+}

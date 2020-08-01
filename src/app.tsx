@@ -35,7 +35,6 @@ const App: FC<Props> = (props: Props): JSX.Element => {
       {unAuthedRoutes.map((route, i) => (
         <Switch key={i}>
           <Route path={route.path} exact={route.exact} component={route.component} />
-          {/* <Route render={() => <Redirect to='login' />} /> */}
         </Switch>
       ))}
     </Fragment>

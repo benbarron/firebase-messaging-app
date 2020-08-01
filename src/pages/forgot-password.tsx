@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { ReduxState } from '../redux/state';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Form, Input, Button, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import { Store } from 'antd/lib/form/interface';
 import { Link } from 'react-router-dom';
 import { auth } from 'firebase';
@@ -46,7 +46,7 @@ const ForgotPassword: FC<ForgotPasswordProps> = (props: ForgotPasswordProps): JS
       </Form.Item>
       <Form.Item className={'form-row'}>
         <Button type='primary' htmlType='submit' className='forgot-button'>
-          Send Passcode
+          Send Reset Email
         </Button>
       </Form.Item>
     </Form>
