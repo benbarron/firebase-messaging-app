@@ -1,12 +1,13 @@
 import { Dispatch, Action } from 'redux';
+import { auth, User } from 'firebase';
 import { Actions } from '../actions';
 import { ReduxState } from '../state';
-import { auth, User } from 'firebase';
 
-export const loginUserWithEmailAndPassword = (email: string, password: string) => {
+export const loginWithEmailAndPassword = (email: string, password: string, remember: boolean) => {
   return async (dispatch: Dispatch<Action<Actions>>, getState: () => ReduxState): Promise<void> => {
     try {
-      await auth().setPersistence(auth.Auth.Persistence.SESSION);
+      const { SESSION, NONE } = auth.Auth.Persistence;
+      await auth().setPersistence(remember ? SESSION : NONE);
       let cred: auth.UserCredential = await auth().signInWithEmailAndPassword(email, password);
       dispatch({ type: Actions.AUTH_SET_USER_LOGGED_IN, payload: { user: cred.user } });
     } catch (error) {

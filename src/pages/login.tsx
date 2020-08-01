@@ -1,24 +1,22 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { connect } from 'react-redux';
 import { ReduxState } from '../redux/state';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { Form, Input, Button, Checkbox } from 'antd';
+import { Form, Input, Button, Checkbox, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { Store } from 'antd/lib/form/interface';
 import { auth } from 'firebase';
 import { StyledFirebaseAuth } from 'react-firebaseui';
-import { loginUserWithEmailAndPassword } from './../redux/actions/auth-actions';
+import { loginWithEmailAndPassword } from './../redux/actions/auth-actions';
 
 interface LoginProps extends RouteComponentProps {
-  loginUserWithEmailAndPassword: (email: string, password: string) => Promise<void>;
+  loginWithEmailAndPassword: (e: string, p: string, r: boolean) => Promise<void>;
   loginWithGithub: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
 }
 
 const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
-  const [error, setError] = useState<string>('');
-
   const firebaseUiConfig = {
     signInFlow: 'popup',
     signInOptions: [
@@ -29,10 +27,11 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
 
   const onFinish = async (values: Store) => {
     try {
-      await props.loginUserWithEmailAndPassword(values.email, values.password);
+      const { email, password, remember } = values;
+      await props.loginWithEmailAndPassword(email, password, remember);
       props.history.push('/');
     } catch (err) {
-      setError(err.message);
+      message.error(err.message);
     }
   };
 
@@ -64,9 +63,6 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
               placeholder='Password'
             />
           </Form.Item>
-
-          {error && <span style={{ color: '#aa0000' }}>{error}</span>}
-
           <Form.Item className={'form-row'}>
             <Form.Item className='remember-me' name='remember' valuePropName='checked' noStyle>
               <Checkbox>Remember me</Checkbox>
@@ -82,10 +78,9 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
           </Form.Item>
           <Form.Item className={'to-register'}>
             <strong>
-              Done have an account? <Link to={'/register'}>Sign Up.</Link> Or Sign in with...
+              Done have an account? <Link to={'/register'}>Sign Up.</Link> Or...
             </strong>
           </Form.Item>
-
           <Form.Item className={'form-row'}>
             <StyledFirebaseAuth uiConfig={firebaseUiConfig} firebaseAuth={auth()} />
           </Form.Item>
@@ -98,7 +93,7 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
 const mapStateToProps = (state: ReduxState) => ({});
 
 const mapDispatchToProps = {
-  loginUserWithEmailAndPassword
+  loginWithEmailAndPassword
 };
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));
