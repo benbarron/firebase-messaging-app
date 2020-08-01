@@ -1,0 +1,10 @@
+extends: airbnb-typescript
+
+parserOptions:
+  project: ./tsconfig.json
+
+rules:
+  jsx-quotes: prefer-single
+  quotes: single
+  no-console: allow
+  eol-last: never

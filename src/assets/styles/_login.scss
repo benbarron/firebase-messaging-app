@@ -1,0 +1,55 @@
+#login-page,
+#register-page,
+#forgot-page {
+  .login-form-wrapper,
+  .register-form-wrapper,
+  .forgot-form-wrapper {
+    h1.form-header {
+      font-size: 32px;
+      text-align: center;
+      margin: 10px 0px;
+    }
+    .form-row {
+      margin-top: 10px;
+    }
+    border-radius: 4px;
+    background: lighten(#ecf0f1, 5);
+    border: #bdc3c7 1px solid;
+    padding: 15px;
+    position: absolute;
+    width: 350px;
+    min-height: 400px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    .remember-me {
+      float: right;
+    }
+    .forgot-password {
+      float: right;
+    }
+    .login-button,
+    .register-button,
+    .forgot-button {
+      width: 100%;
+    }
+    .to-register,
+    .to-login {
+      text-align: center;
+    }
+    .col {
+      padding: 5px;
+    }
+    .sign-in-with {
+      text-align: center;
+      margin-top: 5;
+    }
+    .brand-button {
+      width: 100%;
+    }
+    .google-button {
+    }
+    .github-button {
+    }
+  }
+}
