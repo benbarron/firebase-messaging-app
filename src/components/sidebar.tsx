@@ -1,58 +1,87 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { ReduxState } from '../redux/state';
-import { Menu } from 'antd';
-import { AppstoreOutlined, UsergroupAddOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+  makeStyles,
+  List,
+  ListItem,
+  SwipeableDrawer,
+  ListItemIcon,
+  ListItemText,
+  Divider
+} from '@material-ui/core';
+import { GroupOutlined, ExitToApp, SettingsOutlined, HomeOutlined } from '@material-ui/icons';
+import firebase from 'firebase';
 
 interface SideBarProps extends RouteComponentProps {
+  setIsSideBarCollapsed: (value: boolean) => void;
   collapsed: boolean;
 }
 
-const SideBar: FC<SideBarProps> = (props: SideBarProps): JSX.Element => {
-  return (
-    <>
-      <Menu
-        className='sidenav'
-        onClick={() => true}
-        defaultOpenKeys={[]}
-        mode='inline'
-        inlineCollapsed={props.collapsed}
-      >
-        <Menu.SubMenu
-          key='sub1'
-          title={
-            <span>
-              <UsergroupAddOutlined />
-              <span>Groups</span>
-            </span>
-          }
-        >
-          <Menu.Item key='1'>Group 1</Menu.Item>
-          <Menu.Item key='2'>Group 2</Menu.Item>
-        </Menu.SubMenu>
+const useStyles = makeStyles({
+  list: {
+    width: 250
+  }
+});
 
-        <Menu.SubMenu
-          key='sub4'
-          title={
-            <span>
-              <SettingOutlined />
-              <span>Settings</span>
-            </span>
-          }
-        >
-          <Menu.Item key='9'>Setting 1</Menu.Item>
-          <Menu.Item key='10'>Option 2</Menu.Item>
-          <Menu.Item key='11'>Option 3</Menu.Item>
-          <Menu.Item key='12'>Option 4</Menu.Item>
-        </Menu.SubMenu>
-      </Menu>
-    </>
+const SideBar: FC<SideBarProps> = (props: SideBarProps): JSX.Element => {
+  const classes = useStyles();
+
+  const logout = async (): Promise<void> => {
+    const auth: firebase.auth.Auth = firebase.auth();
+    await auth.signOut();
+    props.history.push('/');
+  };
+
+  const navigate = (path: string): void => {
+    props.history.push(path);
+    props.setIsSideBarCollapsed(true);
+  };
+
+  const SidebarList = () => (
+    <List className={classes.list}>
+      <ListItem button onClick={(e) => navigate('/')}>
+        <ListItemIcon>
+          <HomeOutlined />
+        </ListItemIcon>
+        <ListItemText primary={'Home'} />
+      </ListItem>
+      <Divider />
+      <ListItem button onClick={(e) => navigate('/groups')}>
+        <ListItemIcon>
+          <GroupOutlined />
+        </ListItemIcon>
+        <ListItemText primary={'Groups'} />
+      </ListItem>
+      <Divider />
+      <ListItem button onClick={(e) => navigate('/settings')}>
+        <ListItemIcon>
+          <SettingsOutlined />
+        </ListItemIcon>
+        <ListItemText primary={'Settings'} />
+      </ListItem>
+      <Divider />
+      <ListItem button onClick={logout}>
+        <ListItemIcon>
+          <ExitToApp />
+        </ListItemIcon>
+        <ListItemText primary={'Logout'} />
+      </ListItem>
+    </List>
+  );
+
+  return (
+    <Fragment>
+      <SwipeableDrawer
+        anchor={'left'}
+        open={!props.collapsed}
+        onClose={() => props.setIsSideBarCollapsed(true)}
+        onOpen={() => props.setIsSideBarCollapsed(false)}
+      >
+        <SidebarList />
+      </SwipeableDrawer>
+    </Fragment>
   );
 };
 
-const mapStateToProps = (state: ReduxState) => ({});
-
-const mapDispatchToProps = {};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SideBar));
+export default withRouter(SideBar);

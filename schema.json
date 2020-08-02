@@ -1,0 +1,27 @@
+{
+  "users": {
+    "uid": "string",
+    "email": "string",
+    "password": "string"
+  },
+  "groups": {
+    "id": "string",
+    "date_created": "timestamp",
+    "owner_id": "string (references users.uid)",
+    "name": "string",
+    "description": "string",
+    "members": ["uid (references users.uid)"]
+  },
+  "messages": {
+    "id": "string",
+    "date_created": "timestamp",
+    "user": {
+      "uid": "string",
+      "displayName": "string",
+      "photoURL": "string"
+    },
+    "group_id": "string (references groups.id)",
+    "text": "string",
+    "tags": ["uid (references users.uid)"]
+  }
+}

@@ -1,14 +1,27 @@
-import React, { FC } from 'react';
-import { connect } from 'react-redux';
-import { ReduxState } from '../redux/state';
+import React, { FC, useState } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { Form, Input, Button, Checkbox, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { Store } from 'antd/lib/form/interface';
 import { auth } from 'firebase';
 import { StyledFirebaseAuth } from 'react-firebaseui';
-import { loginWithEmailAndPassword } from './../redux/actions/auth-actions';
+import firebase from 'firebase';
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  FormGroup,
+  FormControl,
+  InputAdornment,
+  TextField,
+  IconButton,
+  Button,
+  Grid,
+  FormControlLabel,
+  Checkbox,
+  Snackbar
+} from '@material-ui/core';
+import MuiAlert from '@material-ui/lab/Alert';
+import { AccountCircle, Visibility, VisibilityOff } from '@material-ui/icons';
 
 interface LoginProps extends RouteComponentProps {
   loginWithEmailAndPassword: (e: string, p: string, r: boolean) => Promise<void>;
@@ -16,7 +29,38 @@ interface LoginProps extends RouteComponentProps {
   loginWithGoogle: () => Promise<void>;
 }
 
+interface SnackBarType {
+  type: 'error' | 'warning' | 'info' | 'success' | '';
+  message: string;
+  show: boolean;
+}
+
+const initialSnackBar: SnackBarType = {
+  show: false,
+  message: '',
+  type: ''
+};
+
 const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [remember, setRemember] = useState<boolean>(true);
+  const [snackBar, setSnackBar] = useState<SnackBarType>(initialSnackBar);
+
+  const toggleRemember = () => setRemember(!remember);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+  const handleEmailChange = (e: any) => setEmail(e.target.value);
+  const handlePasswordChange = (e: any) => setPassword(e.target.value);
+
+  const closeSnackBar = (e: any) => {
+    setSnackBar({
+      type: '',
+      message: '',
+      show: false
+    });
+  };
+
   const firebaseUiConfig = {
     signInFlow: 'popup',
     signInOptions: [
@@ -25,75 +69,121 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
     ]
   };
 
-  const onFinish = async (values: Store) => {
+  const login = async (e: any) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      return setSnackBar({
+        type: 'error',
+        message: 'Email and password are required',
+        show: true
+      });
+    }
+
     try {
-      const { email, password, remember } = values;
-      await props.loginWithEmailAndPassword(email, password, remember);
+      const auth: firebase.auth.Auth = firebase.auth();
+      const { NONE, SESSION } = firebase.auth.Auth.Persistence;
+      auth.setPersistence(remember ? SESSION : NONE);
+      await auth.signInWithEmailAndPassword(email, password);
       props.history.push('/');
     } catch (err) {
-      message.error(err.message);
+      setSnackBar({
+        type: 'error',
+        message: err.message,
+        show: true
+      });
     }
   };
 
+  const passwordProps = {
+    endAdornment: (
+      <InputAdornment position='start'>
+        <IconButton aria-label='toggle password visibility' onClick={toggleShowPassword}>
+          {!showPassword ? <Visibility /> : <VisibilityOff />}
+        </IconButton>
+      </InputAdornment>
+    )
+  };
+
+  const RememberCheckBox = (checkboxProps: any): JSX.Element => (
+    <Checkbox
+      {...checkboxProps}
+      checked={remember}
+      size={'small'}
+      color={'default'}
+      onChange={toggleRemember}
+      inputProps={{ 'aria-label': 'primary checkbox' }}
+    />
+  );
+
+  const Alert = (alertProps: any): JSX.Element => (
+    <Snackbar
+      open={snackBar.show}
+      autoHideDuration={5000}
+      onClose={closeSnackBar}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+    >
+      <MuiAlert elevation={6} variant={'filled'} {...alertProps} severity={snackBar.type}>
+        {snackBar.message}
+      </MuiAlert>
+    </Snackbar>
+  );
+
   return (
     <div id='login-page'>
-      <div className='login-form-wrapper z-depth-2'>
-        <h1 className='form-header'>Login</h1>
-        <Form
-          name='normal_login'
-          className='login-form'
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            className={'form-row'}
-            name='email'
-            rules={[{ required: true, message: 'Please input your Email!' }]}
-          >
-            <Input prefix={<UserOutlined className='site-form-item-icon' />} placeholder='Email' />
-          </Form.Item>
-          <Form.Item
-            className={'form-row'}
-            name='password'
-            rules={[{ required: true, message: 'Please input your Password!' }]}
-          >
-            <Input
-              prefix={<LockOutlined className='site-form-item-icon' />}
-              type='password'
-              placeholder='Password'
-            />
-          </Form.Item>
-          <Form.Item className={'form-row'}>
-            <Form.Item className='remember-me' name='remember' valuePropName='checked' noStyle>
-              <Checkbox>Remember me</Checkbox>
-            </Form.Item>
-            <Link to={'/forgot-password'} className={'forgot-password'}>
-              Forgot password
-            </Link>
-          </Form.Item>
-          <Form.Item className={'form-row'}>
-            <Button type='primary' htmlType='submit' className='login-button'>
-              Log in
-            </Button>
-          </Form.Item>
-          <Form.Item className={'to-register'}>
-            <strong>
-              Done have an account? <Link to={'/register'}>Sign Up.</Link> Or...
-            </strong>
-          </Form.Item>
-          <Form.Item className={'form-row'}>
-            <StyledFirebaseAuth uiConfig={firebaseUiConfig} firebaseAuth={auth()} />
-          </Form.Item>
-        </Form>
+      <Alert />
+      <div className='login-form-wrapper'>
+        <Card style={{ padding: 20 }}>
+          <CardHeader title='Login' style={{ textAlign: 'center', marginTop: 10 }} />
+          <CardContent>
+            <form onSubmit={login}>
+              <FormGroup>
+                <FormControl style={{ marginBottom: 20 }}>
+                  <TextField
+                    id='email-input'
+                    label='Email Address'
+                    value={email}
+                    onChange={handleEmailChange}
+                  />
+                </FormControl>
+                <FormControl style={{ marginBottom: 40 }}>
+                  <TextField
+                    type={showPassword ? 'text' : 'password'}
+                    id='password-input'
+                    label='Password'
+                    InputProps={passwordProps}
+                    value={password}
+                    onChange={handlePasswordChange}
+                  />
+                </FormControl>
+                <FormControl style={{ marginBottom: 40, padding: '0px 10px' }}>
+                  <Grid container spacing={2} justify={'space-between'}>
+                    <FormControlLabel label={'Remember Me'} control={<RememberCheckBox />} />
+                    <Link to='/forgot-password' style={{ display: 'flex', alignItems: 'center' }}>
+                      Forgot Password
+                    </Link>
+                  </Grid>
+                </FormControl>
+                <FormControl style={{ marginBottom: 40 }}>
+                  <Button variant={'contained'} color='default' onClick={login}>
+                    Login
+                  </Button>
+                </FormControl>
+                <FormControl>
+                  <p>
+                    Don't have an account? <Link to={'/register'}>Sign up here.</Link> Or...
+                  </p>
+                </FormControl>
+                <FormControl>
+                  <StyledFirebaseAuth uiConfig={firebaseUiConfig} firebaseAuth={firebase.auth()} />
+                </FormControl>
+              </FormGroup>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
 
-const mapStateToProps = (state: ReduxState) => ({});
-
-const mapDispatchToProps = {
-  loginWithEmailAndPassword
-};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));
+export default withRouter(Login);

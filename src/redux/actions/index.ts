@@ -1,4 +1,0 @@
-export enum Actions {
-  AUTH_SET_USER_LOGGED_IN,
-  AUTH_SET_USER_LOGGED_OUT
-}

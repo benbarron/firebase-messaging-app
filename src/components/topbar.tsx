@@ -1,72 +1,70 @@
-import React, { FC, Fragment } from 'react';
-import { connect } from 'react-redux';
+import React, { FC, Fragment, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { ReduxState } from '../redux/state';
-import { SearchOutlined, UserOutlined } from '@ant-design/icons';
-import { Menu, Dropdown, Input, Avatar } from 'antd';
-import { User } from 'firebase';
 import { Link } from 'react-router-dom';
-import { logout } from './../redux/actions/auth-actions';
+import firebase, { User } from 'firebase';
+import { makeStyles } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import { Avatar, Grid } from '@material-ui/core';
+import { ExitToApp } from '@material-ui/icons';
+import SideBar from './sidebar';
 
-interface TopBarProps extends RouteComponentProps {
-  user: User | null;
-  toggleSideBar: (value: boolean) => void;
-  logout: () => Promise<void>;
-}
+const useStyles = makeStyles((theme) => ({
+  toolbar: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  menuIconButton: {},
+  logoutIconButton: {
+    marginLeft: 20,
+    cursor: 'pointer'
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    cursor: 'pointer'
+  },
+  appbar: {
+    background: '#0984e3'
+  }
+}));
+
+interface TopBarProps extends RouteComponentProps {}
 
 const TopBar: FC<TopBarProps> = (props: TopBarProps): JSX.Element => {
-  const logout = async () => {
-    await props.logout();
-    props.history.push('/login');
-  };
+  const classes = useStyles();
+  const user: User | null = firebase.auth().currentUser;
 
-  const userActionsMenu: JSX.Element = (
-    <Menu>
-      <Menu.Item>
-        <Link to='profile'>
-          <strong>Go To Profile</strong>
-        </Link>
-      </Menu.Item>
-      <Menu.Item onClick={logout}>
-        <strong>Logout</strong>
-      </Menu.Item>
-    </Menu>
-  );
-
-  const userAvatar = <Avatar src={String(props.user?.photoURL)} className='user-avatar' />;
-
-  const defaultAvatar = <Avatar icon={<UserOutlined />} />;
+  const [isSideBarCollapsed, setIsSideBarCollapsed] = useState<boolean>(true);
+  const toggleIsSideBarCollapsed = () => setIsSideBarCollapsed(!isSideBarCollapsed);
 
   return (
     <Fragment>
-      <div className='top-nav-branding'>
-        <h1>Brand Name</h1>
-      </div>
-      <div className='top-nav-content'>
-        <div className='search-box-wrapper'>
-          <Input
-            size='middle'
-            placeholder='Search...'
-            prefix={<SearchOutlined />}
-            className='search-box'
+      <AppBar position='static' className={classes.appbar}>
+        <Toolbar className={classes.toolbar}>
+          <IconButton
+            edge='start'
+            className={classes.menuIconButton}
+            color='inherit'
+            aria-label='menu'
+            onClick={toggleIsSideBarCollapsed}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Avatar
+            onClick={() => props.history.push('/profile')}
+            className={classes.avatar + ' z-depth-1'}
+            src={user?.photoURL || '/assets/default-avatar.png'}
           />
-        </div>
-        <div className='userinfo-box'>
-          <Dropdown overlay={userActionsMenu} placement='bottomCenter' className='z-depth-1'>
-            {props.user?.photoURL ? userAvatar : defaultAvatar}
-          </Dropdown>
-        </div>
-      </div>
+        </Toolbar>
+      </AppBar>
+      <SideBar collapsed={isSideBarCollapsed} setIsSideBarCollapsed={setIsSideBarCollapsed} />
     </Fragment>
   );
 };
 
-const mapStateToProps = (state: ReduxState) => ({
-  user: state.user
-});
-
-const mapDispatchToProps = {
-  logout
-};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TopBar));
+export default withRouter(TopBar);

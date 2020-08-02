@@ -22,12 +22,9 @@
     .form-row {
       margin-top: 10px;
     }
-    border-radius: 4px;
-    background: lighten(#ecf0f1, 5);
-    border: #bdc3c7 1px solid;
-    padding: 15px;
     position: absolute;
-    width: 350px;
+    width: calc(100vw - 20px);
+    max-width: 375px;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);

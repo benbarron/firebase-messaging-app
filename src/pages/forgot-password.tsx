@@ -1,55 +1,96 @@
 import React, { FC, useState, Fragment } from 'react';
-import { connect } from 'react-redux';
-import { ReduxState } from '../redux/state';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { Form, Input, Button, message } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
 import { Store } from 'antd/lib/form/interface';
 import { Link } from 'react-router-dom';
-import { auth } from 'firebase';
+import firebase from 'firebase';
+import {
+  Snackbar,
+  Card,
+  CardHeader,
+  CardContent,
+  FormGroup,
+  FormControl,
+  Button,
+  TextField
+} from '@material-ui/core';
+import MuiAlert from '@material-ui/lab/Alert';
 
 interface ForgotPasswordProps extends RouteComponentProps {}
+
+interface SnackBarType {
+  type: 'error' | 'warning' | 'info' | 'success' | '';
+  message: string;
+  show: boolean;
+}
+
+const initialSnackBar: SnackBarType = {
+  show: false,
+  message: '',
+  type: ''
+};
 
 const ForgotPassword: FC<ForgotPasswordProps> = (props: ForgotPasswordProps): JSX.Element => {
   const [step, setStep] = useState<number>(0);
   const [email, setEmail] = useState<string>('');
+  const [snackBar, setSnackBar] = useState<SnackBarType>(initialSnackBar);
 
-  const onFinishEmail = async (values: Store) => {
+  const handleEmailChange = (e: any) => setEmail(e.target.value);
+
+  const closeSnackBar = (e: any) => {
+    setSnackBar({
+      type: '',
+      message: '',
+      show: false
+    });
+  };
+
+  const sendResetEmail = async (e: any) => {
+    e.preventDefault();
+
+    if (!email) {
+      return setSnackBar({
+        type: 'error',
+        message: 'Please enter the email address that is associated with your account.',
+        show: true
+      });
+    }
     try {
-      await auth().sendPasswordResetEmail(values.email);
-      setEmail(values.email);
+      const auth: firebase.auth.Auth = firebase.auth();
+      await auth.sendPasswordResetEmail(email);
       setStep(1);
     } catch (err) {
-      message.error(err.message);
+      setSnackBar({
+        type: 'error',
+        message: err.message,
+        show: true
+      });
     }
   };
 
   const emailForm: JSX.Element = (
-    <Form
-      name='normal_login'
-      className='forgot-form'
-      initialValues={{ remember: true }}
-      onFinish={onFinishEmail}
-    >
-      <Form.Item>
-        <small className='form-instruction'>
-          To reset your passsword, please enter the email address that is registered with your
-          account below.
-        </small>
-      </Form.Item>
-      <Form.Item
-        className={'form-row'}
-        name='email'
-        rules={[{ required: true, message: 'Please input your Email!' }]}
-      >
-        <Input prefix={<UserOutlined className='site-form-item-icon' />} placeholder='Email' />
-      </Form.Item>
-      <Form.Item className={'form-row'}>
-        <Button type='primary' htmlType='submit' className='forgot-button'>
-          Send Reset Email
-        </Button>
-      </Form.Item>
-    </Form>
+    <form onSubmit={sendResetEmail}>
+      <FormGroup>
+        <FormControl>
+          <small style={{ textAlign: 'center' }}>
+            Please enter the email address that is associated with you account. We will then send
+            you an email with instructions on how to reset you password.
+          </small>
+        </FormControl>
+        <FormControl style={{ marginBottom: 20 }}>
+          <TextField
+            id='email-input'
+            label='Email Address'
+            value={email}
+            onChange={handleEmailChange}
+          />
+        </FormControl>
+        <FormControl>
+          <Button color={'default'} variant={'contained'} onClick={sendResetEmail}>
+            Send Reset Email
+          </Button>
+        </FormControl>
+      </FormGroup>
+    </form>
   );
 
   const acknowledgment: JSX.Element = (
@@ -63,18 +104,30 @@ const ForgotPassword: FC<ForgotPasswordProps> = (props: ForgotPasswordProps): JS
     </Fragment>
   );
 
+  const Alert = (alertProps: any): JSX.Element => (
+    <Snackbar
+      open={snackBar.show}
+      autoHideDuration={5000}
+      onClose={closeSnackBar}
+      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+    >
+      <MuiAlert elevation={6} variant={'filled'} {...alertProps} severity={snackBar.type}>
+        {snackBar.message}
+      </MuiAlert>
+    </Snackbar>
+  );
+
   return (
     <div id='forgot-page'>
-      <div className='forgot-form-wrapper z-depth-2' style={{ textAlign: 'center' }}>
-        <h1 className='form-header'>Forgot Password</h1>
-        {step == 0 ? emailForm : acknowledgment}
+      <Alert />
+      <div className='forgot-form-wrapper'>
+        <Card style={{ padding: 20 }}>
+          <CardHeader title='Password Reset' style={{ textAlign: 'center', marginTop: 10 }} />
+          <CardContent>{step == 0 ? emailForm : acknowledgment}</CardContent>
+        </Card>
       </div>
     </div>
   );
 };
 
-const mapStateToProps = (state: ReduxState) => ({});
-
-const mapDispatchToProps = {};
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ForgotPassword));
+export default withRouter(ForgotPassword);
