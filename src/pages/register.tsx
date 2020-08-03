@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useContext } from 'react';
 import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Store } from 'antd/lib/form/interface';
@@ -21,28 +21,18 @@ import {
   Snackbar
 } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { NotificationContext } from '../context/notifcation-context';
+import { Notification } from '../context/notification-reducer';
 
 interface RegisterProps extends RouteComponentProps {
   register: (email: string, password: string) => Promise<void>;
 }
 
-interface SnackBarType {
-  type: 'error' | 'warning' | 'info' | 'success' | '';
-  message: string;
-  show: boolean;
-}
-
-const initialSnackBar: SnackBarType = {
-  show: false,
-  message: '',
-  type: ''
-};
-
 const Register: FC<RegisterProps> = (props: RegisterProps): JSX.Element => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [snackBar, setSnackBar] = useState<SnackBarType>(initialSnackBar);
+  const notification: Notification = useContext(NotificationContext);
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const handleEmailChange = (e: any) => setEmail(e.target.value);
@@ -52,11 +42,11 @@ const Register: FC<RegisterProps> = (props: RegisterProps): JSX.Element => {
     e.preventDefault();
 
     if (!email || !password) {
-      return setSnackBar({
-        type: 'error',
-        message: 'Please enter an email address and password.',
-        show: true
-      });
+      return notification.displayNotification(
+        'Both email and password are required.',
+        'error',
+        null
+      );
     }
 
     try {
@@ -64,20 +54,8 @@ const Register: FC<RegisterProps> = (props: RegisterProps): JSX.Element => {
       await auth.createUserWithEmailAndPassword(email, password);
       props.history.push('/');
     } catch (err) {
-      setSnackBar({
-        type: 'error',
-        message: err.message,
-        show: true
-      });
+      notification.displayNotification(err.message, 'error', null);
     }
-  };
-
-  const closeSnackBar = (e: any) => {
-    setSnackBar({
-      type: '',
-      message: '',
-      show: false
-    });
   };
 
   const passwordProps = {
@@ -90,26 +68,17 @@ const Register: FC<RegisterProps> = (props: RegisterProps): JSX.Element => {
     )
   };
 
-  const Alert = (alertProps: any): JSX.Element => (
-    <Snackbar
-      open={snackBar.show}
-      autoHideDuration={5000}
-      onClose={closeSnackBar}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-    >
-      <MuiAlert elevation={6} variant={'filled'} {...alertProps} severity={snackBar.type}>
-        {snackBar.message}
-      </MuiAlert>
-    </Snackbar>
-  );
-
   return (
     <div id='register-page'>
-      <Alert />
       <div className='register-form-wrapper'>
         <Card style={{ padding: 20 }}>
-          <CardHeader title='Register' style={{ textAlign: 'center', marginTop: 10 }} />
           <CardContent>
+            <Grid container justify='space-between' alignItems='center'>
+              <Grid item>
+                <h1>Register</h1>
+              </Grid>
+              <Grid item></Grid>
+            </Grid>
             <form onSubmit={register}>
               <FormGroup>
                 <FormControl style={{ marginBottom: 20 }}>
@@ -134,6 +103,11 @@ const Register: FC<RegisterProps> = (props: RegisterProps): JSX.Element => {
                   <Button variant={'contained'} color='default' onClick={register}>
                     Login
                   </Button>
+                </FormControl>
+                <FormControl>
+                  <p>
+                    Already have an account? <Link to={'/login'}>Sign in here.</Link>
+                  </p>
                 </FormControl>
               </FormGroup>
             </form>

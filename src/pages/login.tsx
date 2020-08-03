@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useContext } from 'react';
 import { connect, useSelector } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -17,11 +17,12 @@ import {
   Button,
   Grid,
   FormControlLabel,
-  Checkbox,
-  Snackbar
+  Checkbox
 } from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
-import { AccountCircle, Visibility, VisibilityOff } from '@material-ui/icons';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { Notification } from '../context/notification-reducer';
+import { NotificationContext } from '../context/notifcation-context';
 
 interface LoginProps extends RouteComponentProps {
   loginWithEmailAndPassword: (e: string, p: string, r: boolean) => Promise<void>;
@@ -29,43 +30,25 @@ interface LoginProps extends RouteComponentProps {
   loginWithGoogle: () => Promise<void>;
 }
 
-interface SnackBarType {
-  type: 'error' | 'warning' | 'info' | 'success' | '';
-  message: string;
-  show: boolean;
-}
-
-const initialSnackBar: SnackBarType = {
-  show: false,
-  message: '',
-  type: ''
-};
-
 const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
+  const notification: Notification = useContext(NotificationContext);
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [remember, setRemember] = useState<boolean>(true);
-  const [snackBar, setSnackBar] = useState<SnackBarType>(initialSnackBar);
 
   const toggleRemember = () => setRemember(!remember);
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const handleEmailChange = (e: any) => setEmail(e.target.value);
   const handlePasswordChange = (e: any) => setPassword(e.target.value);
 
-  const closeSnackBar = (e: any) => {
-    setSnackBar({
-      type: '',
-      message: '',
-      show: false
-    });
-  };
-
   const firebaseUiConfig = {
     signInFlow: 'popup',
     signInOptions: [
       auth.GoogleAuthProvider.PROVIDER_ID, //
-      auth.GithubAuthProvider.PROVIDER_ID
+      auth.GithubAuthProvider.PROVIDER_ID,
+      auth.TwitterAuthProvider.PROVIDER_ID
     ]
   };
 
@@ -73,11 +56,11 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
     e.preventDefault();
 
     if (!email || !password) {
-      return setSnackBar({
-        type: 'error',
-        message: 'Email and password are required',
-        show: true
-      });
+      return notification.displayNotification(
+        'Email and password are required',
+        'error',
+        '/register'
+      );
     }
 
     try {
@@ -87,11 +70,7 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
       await auth.signInWithEmailAndPassword(email, password);
       props.history.push('/');
     } catch (err) {
-      setSnackBar({
-        type: 'error',
-        message: err.message,
-        show: true
-      });
+      notification.displayNotification(err.message, 'error', null);
     }
   };
 
@@ -116,26 +95,17 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
     />
   );
 
-  const Alert = (alertProps: any): JSX.Element => (
-    <Snackbar
-      open={snackBar.show}
-      autoHideDuration={5000}
-      onClose={closeSnackBar}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-    >
-      <MuiAlert elevation={6} variant={'filled'} {...alertProps} severity={snackBar.type}>
-        {snackBar.message}
-      </MuiAlert>
-    </Snackbar>
-  );
-
   return (
     <div id='login-page'>
-      <Alert />
       <div className='login-form-wrapper'>
-        <Card style={{ padding: 20 }}>
-          <CardHeader title='Login' style={{ textAlign: 'center', marginTop: 10 }} />
+        <Card style={{ padding: 20 }} className='z-depth-3'>
           <CardContent>
+            <Grid container justify='space-between' alignItems='center'>
+              <Grid item>
+                <h1>Login</h1>
+              </Grid>
+              <Grid item></Grid>
+            </Grid>
             <form onSubmit={login}>
               <FormGroup>
                 <FormControl style={{ marginBottom: 20 }}>

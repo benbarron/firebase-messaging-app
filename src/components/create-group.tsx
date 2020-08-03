@@ -1,36 +1,18 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useContext } from 'react';
 import firebase, { User } from 'firebase';
 import { withRouter, RouteComponentProps } from 'react-router';
 import { Grid, FormGroup, FormControl, TextField, Button, Snackbar } from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
+import { Notification } from '../context/notification-reducer';
+import { NotificationContext } from '../context/notifcation-context';
 
 interface CreateGroupProps extends RouteComponentProps {}
-
-interface SnackBarType {
-  type: 'error' | 'warning' | 'info' | 'success' | '';
-  message: string;
-  show: boolean;
-}
-
-const initialSnackBar: SnackBarType = {
-  show: false,
-  message: '',
-  type: ''
-};
 
 const CreateGroup: FC<CreateGroupProps> = (props: CreateGroupProps): JSX.Element => {
   const user: User | null = firebase.auth().currentUser;
   const [groupName, setGroupName] = useState<string>('');
   const [groupDesc, setGroupDesc] = useState<string>('');
-  const [snackBar, setSnackBar] = useState<SnackBarType>(initialSnackBar);
-
-  const closeSnackBar = (e: any) => {
-    setSnackBar({
-      type: '',
-      message: '',
-      show: false
-    });
-  };
+  const notification: Notification = useContext(NotificationContext);
 
   const handleGroupNameChange = (e: any) => {
     setGroupName(e.target.value);
@@ -42,11 +24,11 @@ const CreateGroup: FC<CreateGroupProps> = (props: CreateGroupProps): JSX.Element
 
   const createGroup = async (e: any): Promise<void> => {
     if (!groupName || !groupDesc) {
-      return setSnackBar({
-        type: 'error',
-        message: 'A name and description are both required',
-        show: true
-      });
+      return notification.displayNotification(
+        'A name and description are both required',
+        'error',
+        null
+      );
     }
 
     try {
@@ -58,38 +40,16 @@ const CreateGroup: FC<CreateGroupProps> = (props: CreateGroupProps): JSX.Element
         description: groupDesc,
         members: [user?.uid]
       });
-      setSnackBar({
-        type: 'success',
-        message: `${groupName} has been created`,
-        show: true
-      });
+      notification.displayNotification(`${groupName} has been created`, 'success', null);
       setGroupName('');
       setGroupDesc('');
     } catch (err) {
-      setSnackBar({
-        type: 'error',
-        message: err.message,
-        show: true
-      });
+      notification.displayNotification(err.message, 'error', null);
     }
   };
 
-  const Alert = (alertProps: any): JSX.Element => (
-    <Snackbar
-      open={snackBar.show}
-      autoHideDuration={5000}
-      onClose={closeSnackBar}
-      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-    >
-      <MuiAlert elevation={6} variant={'filled'} {...alertProps} severity={snackBar.type}>
-        {snackBar.message}
-      </MuiAlert>
-    </Snackbar>
-  );
-
   return (
     <Grid container>
-      <Alert />
       <Grid item xs={12}>
         <h1>Create A Group</h1>
       </Grid>

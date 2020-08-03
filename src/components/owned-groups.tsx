@@ -24,17 +24,19 @@ const OwnedGroups: FC<OwnedGroupsProps> = (props: OwnedGroupsProps): JSX.Element
     firestore
       .collection('groups')
       .where('ownerId', '==', user?.uid)
-      .onSnapshot((q) => setGroups(q.docs.map((doc) => ({ ...doc.data(), id: doc.id }))));
+      .onSnapshot(query => {
+        setGroups(query.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+      });
   }, []);
 
   return (
     <>
       <h1>Groups You Own</h1>
-      {groups.map((group) => (
+      {groups.map(group => (
         <Card
           key={group.id}
           className={classes.card}
-          onClick={(e) => props.history.push(`/group/${group.id}`)}
+          onClick={e => props.history.push(`/group/${group.id}`)}
         >
           <CardContent>
             <Grid container>
