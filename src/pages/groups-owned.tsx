@@ -1,9 +1,9 @@
 import React, { FC, useState, useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
 import firebase, { User } from 'firebase';
-import { Card, CardContent, Grid, makeStyles } from '@material-ui/core';
+import { Card, CardContent, Grid, makeStyles, Container } from '@material-ui/core';
 
-interface OwnedGroupsProps extends RouteComponentProps {}
+interface GroupsOwnedProps extends RouteComponentProps {}
 
 const useStyles = makeStyles({
   card: {
@@ -12,7 +12,7 @@ const useStyles = makeStyles({
   }
 });
 
-const OwnedGroups: FC<OwnedGroupsProps> = (props: OwnedGroupsProps): JSX.Element => {
+const GroupsOwned: FC<GroupsOwnedProps> = (props: GroupsOwnedProps): JSX.Element => {
   const classes = useStyles();
   const [groups, setGroups] = useState<any[]>([]);
   const firestore: firebase.firestore.Firestore = firebase.firestore();
@@ -25,18 +25,28 @@ const OwnedGroups: FC<OwnedGroupsProps> = (props: OwnedGroupsProps): JSX.Element
       .collection('groups')
       .where('ownerId', '==', user?.uid)
       .onSnapshot(query => {
-        setGroups(query.docs.map(doc => ({ ...doc.data(), id: doc.id })));
+        setGroups(
+          query.docs
+            .map(doc => ({ ...doc.data(), id: doc.id }))
+            .sort((a: any, b: any) => {
+              if (new Date(a.dateCreated) > new Date(b.dateCreated)) {
+                return 1;
+              } else {
+                return -1;
+              }
+            })
+        );
       });
   }, []);
 
   return (
-    <>
+    <Container maxWidth={'sm'} style={{ marginTop: 50 }}>
       <h1>Groups You Own</h1>
       {groups.map(group => (
         <Card
           key={group.id}
           className={classes.card}
-          onClick={e => props.history.push(`/group/${group.id}`)}
+          onClick={e => props.history.push(`/groups/${group.id}/messages`)}
         >
           <CardContent>
             <Grid container>
@@ -47,8 +57,8 @@ const OwnedGroups: FC<OwnedGroupsProps> = (props: OwnedGroupsProps): JSX.Element
           </CardContent>
         </Card>
       ))}
-    </>
+    </Container>
   );
 };
 
-export default withRouter(OwnedGroups);
+export default withRouter(GroupsOwned);

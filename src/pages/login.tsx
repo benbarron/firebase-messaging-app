@@ -1,60 +1,39 @@
 import React, { FC, useState, useContext } from 'react';
-import { connect, useSelector } from 'react-redux';
-import { withRouter, RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
-import { auth } from 'firebase';
+import { withRouter, RouteComponentProps } from 'react-router';
 import { StyledFirebaseAuth } from 'react-firebaseui';
-import firebase from 'firebase';
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  FormGroup,
-  FormControl,
-  InputAdornment,
-  TextField,
-  IconButton,
-  Button,
-  Grid,
-  FormControlLabel,
-  Checkbox
-} from '@material-ui/core';
-import MuiAlert from '@material-ui/lab/Alert';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
 import { Notification } from '../context/notification-reducer';
 import { NotificationContext } from '../context/notifcation-context';
+import { firebaseUiConfig } from '../env';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControl from '@material-ui/core/FormControl';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Grid';
+import firebase from 'firebase';
 
-interface LoginProps extends RouteComponentProps {
-  loginWithEmailAndPassword: (e: string, p: string, r: boolean) => Promise<void>;
-  loginWithGithub: () => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
-}
+interface LoginProps extends RouteComponentProps {}
 
 const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
   const notification: Notification = useContext(NotificationContext);
-
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [remember, setRemember] = useState<boolean>(true);
-
   const toggleRemember = () => setRemember(!remember);
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const handleEmailChange = (e: any) => setEmail(e.target.value);
   const handlePasswordChange = (e: any) => setPassword(e.target.value);
 
-  const firebaseUiConfig = {
-    signInFlow: 'popup',
-    signInOptions: [
-      auth.GoogleAuthProvider.PROVIDER_ID, //
-      auth.GithubAuthProvider.PROVIDER_ID,
-      auth.TwitterAuthProvider.PROVIDER_ID
-    ]
-  };
-
   const login = async (e: any) => {
     e.preventDefault();
-
     if (!email || !password) {
       return notification.displayNotification(
         'Email and password are required',
@@ -62,7 +41,6 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
         '/register'
       );
     }
-
     try {
       const auth: firebase.auth.Auth = firebase.auth();
       const { NONE, SESSION } = firebase.auth.Auth.Persistence;
@@ -91,7 +69,6 @@ const Login: FC<LoginProps> = (props: LoginProps): JSX.Element => {
       size={'small'}
       color={'default'}
       onChange={toggleRemember}
-      inputProps={{ 'aria-label': 'primary checkbox' }}
     />
   );
 

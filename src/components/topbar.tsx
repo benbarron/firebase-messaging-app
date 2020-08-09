@@ -1,19 +1,15 @@
 import React, { FC, Fragment, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
-import { Link } from 'react-router-dom';
 import firebase, { User } from 'firebase';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-import { Avatar, Grid } from '@material-ui/core';
-import { ExitToApp } from '@material-ui/icons';
+import { Avatar } from '@material-ui/core';
 import SideBar from './sidebar';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   toolbar: {
     display: 'flex',
     justifyContent: 'space-between'

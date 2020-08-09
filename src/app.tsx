@@ -8,14 +8,13 @@ interface Props extends RouteComponentProps {}
 
 const App: FC<Props> = (props: Props): JSX.Element => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const user: User | null = firebase.auth().currentUser;
-    setIsLoggedIn(user ? true : false);
-  }, []);
-
-  firebase.auth().onAuthStateChanged((user: User | null) => {
-    setIsLoggedIn(user ? true : false);
+    firebase.auth().onAuthStateChanged((user: User | null) => {
+      setIsLoggedIn(user ? true : false);
+      setIsLoading(false);
+    });
   });
 
   const loggedInRoutes: JSX.Element = (
@@ -51,7 +50,7 @@ const App: FC<Props> = (props: Props): JSX.Element => {
     </Fragment>
   );
 
-  return isLoggedIn ? loggedInRoutes : notLoggedInRoutes;
+  return isLoading ? <></> : isLoggedIn ? loggedInRoutes : notLoggedInRoutes;
 };
 
 export default withRouter(App);

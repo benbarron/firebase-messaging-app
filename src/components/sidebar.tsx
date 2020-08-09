@@ -10,7 +10,14 @@ import {
   ListItemText,
   Divider
 } from '@material-ui/core';
-import { GroupOutlined, ExitToApp, SettingsOutlined, HomeOutlined } from '@material-ui/icons';
+import {
+  GroupOutlined,
+  ExitToApp,
+  SettingsOutlined,
+  HomeOutlined,
+  AddOutlined,
+  PlaylistAdd
+} from '@material-ui/icons';
 import firebase from 'firebase';
 
 interface SideBarProps extends RouteComponentProps {
@@ -40,21 +47,35 @@ const SideBar: FC<SideBarProps> = (props: SideBarProps): JSX.Element => {
 
   const SidebarList = () => (
     <List className={classes.list}>
-      <ListItem button onClick={(e) => navigate('/')}>
+      <ListItem button onClick={e => navigate('/')}>
         <ListItemIcon>
           <HomeOutlined />
         </ListItemIcon>
         <ListItemText primary={'Home'} />
       </ListItem>
       <Divider />
-      <ListItem button onClick={(e) => navigate('/groups')}>
+      <ListItem button onClick={e => navigate('/groups/join')}>
+        <ListItemIcon>
+          <PlaylistAdd />
+        </ListItemIcon>
+        <ListItemText primary={'Join Group'} />
+      </ListItem>
+      <Divider />
+      <ListItem button onClick={e => navigate('/groups/create')}>
+        <ListItemIcon>
+          <AddOutlined />
+        </ListItemIcon>
+        <ListItemText primary={'Create Group'} />
+      </ListItem>
+      <Divider />
+      <ListItem button onClick={e => navigate('/groups/owned')}>
         <ListItemIcon>
           <GroupOutlined />
         </ListItemIcon>
-        <ListItemText primary={'Groups'} />
+        <ListItemText primary={'Groups You Own'} />
       </ListItem>
       <Divider />
-      <ListItem button onClick={(e) => navigate('/settings')}>
+      <ListItem button onClick={e => navigate('/settings')}>
         <ListItemIcon>
           <SettingsOutlined />
         </ListItemIcon>

@@ -1,4 +1,4 @@
-{
+[{
   "users": {
     "uid": "string",
     "email": "string",
@@ -24,4 +24,4 @@
     "text": "string",
     "tags": ["uid (references users.uid)"]
   }
-}
+}]
